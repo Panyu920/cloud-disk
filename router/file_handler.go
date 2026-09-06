@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Panyu920/cloud-disk/meta"
 	"github.com/Panyu920/cloud-disk/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -36,12 +37,23 @@ func HandleUpload(c *gin.Context) {
 
 	// 保存上传的文件到指定路径
 	for _, file := range form.Files {
+		// 生成文件保存路径
 		dst := filepath.Join("./uploads/", filepath.Base(file.Filename))
 
 		if err := c.SaveUploadedFile(file, dst); err != nil {
 			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to save file", nil)
 			return
 		}
+		// 计算文件的 MD5 值
+		md5, err := utils.MD5File(dst)
+		if err != nil {
+			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to calculate MD5", nil)
+			return
+		}
+		// 生成文件元信息并存储
+		filemeta := meta.GenerateFileMeta(file.Filename, dst, file.Size, md5)
+		meta.AddFileMeta(filemeta)
+
 	}
 	// 获取上传的文件名列表
 	var fileNames []string
