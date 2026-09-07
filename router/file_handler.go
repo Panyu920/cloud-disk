@@ -116,3 +116,60 @@ func GetFileMeta(c *gin.Context) {
 	}
 	utils.ResponseHandler(c, http.StatusOK, "File meta retrieved successfully", meta)
 }
+
+// HandleDownload 处理文件下载请求
+func HandleDownload(c *gin.Context) {
+	fileID := c.Query("file_id")
+	meta, err := meta.GetFileMeta(fileID)
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+		return
+	}
+
+	c.FileAttachment(meta.Location, meta.FileName)
+}
+
+type UpdateFileMetaRequest struct {
+	FileID   string `json:"file_id" binding:"required"`
+	FileName string `json:"file_name" binding:"required"`
+}
+
+// UpdateFileMeta 更新文件元信息
+func UpdateFileMeta(c *gin.Context) {
+	var req UpdateFileMetaRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ResponseHandler(c, http.StatusBadRequest, "Invalid request data", nil)
+		return
+	}
+
+	metaData, err := meta.GetFileMeta(req.FileID)
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+		return
+	}
+
+	metaData.FileName = req.FileName
+	meta.UpdateFileMeta(metaData)
+
+	utils.ResponseHandler(c, http.StatusOK, "File meta updated successfully", metaData)
+}
+
+// DeleteFile 删除文件及其元信息
+func DeleteFile(c *gin.Context) {
+	fileID := c.Query("file_id")
+	metaData, err := meta.GetFileMeta(fileID)
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+		return
+	}
+
+	err = os.Remove(metaData.Location)
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to delete file", nil)
+		return
+	}
+
+	meta.RemoveFileMeta(fileID)
+
+	utils.ResponseHandler(c, http.StatusOK, "File deleted successfully", nil)
+}
