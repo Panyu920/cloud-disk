@@ -34,5 +34,7 @@ func (s *Server) rigisterRoutes() {
 	s.ginEnine.GET("/index", router.HandleIndex)
 	// 文件上传
 	s.ginEnine.POST("/file", router.HandleUpload)
+	// 获取文件元信息
+	s.ginEnine.GET("/file/meta", router.GetFileMeta)
 
 }

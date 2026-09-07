@@ -1,8 +1,12 @@
 package router
 
 import (
+	"io"
+	"io/fs"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -40,18 +44,11 @@ func HandleUpload(c *gin.Context) {
 		// 生成文件保存路径
 		dst := filepath.Join("./uploads/", filepath.Base(file.Filename))
 
-		if err := c.SaveUploadedFile(file, dst); err != nil {
+		filemeta, err := saveUploadedFile(file, dst)
+		if err != nil {
 			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to save file", nil)
 			return
 		}
-		// 计算文件的 MD5 值
-		md5, err := utils.MD5File(dst)
-		if err != nil {
-			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to calculate MD5", nil)
-			return
-		}
-		// 生成文件元信息并存储
-		filemeta := meta.GenerateFileMeta(file.Filename, dst, file.Size, md5)
 		meta.AddFileMeta(filemeta)
 
 	}
@@ -66,4 +63,56 @@ func HandleUpload(c *gin.Context) {
 		Name:     form.Name,
 		Email:    form.Email,
 	})
+}
+
+func saveUploadedFile(file *multipart.FileHeader, dst string, perm ...fs.FileMode) (*meta.FileMeta, error) {
+	// 打开上传的文件
+	src, err := file.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer src.Close()
+
+	//	 创建目标文件夹
+	var mode os.FileMode = 0o750
+	if len(perm) > 0 {
+		mode = perm[0]
+	}
+	dir := filepath.Dir(dst)
+	if err = os.MkdirAll(dir, mode); err != nil {
+		return nil, err
+	}
+	if err = os.Chmod(dir, mode); err != nil {
+		return nil, err
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return nil, err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, src)
+	if err != nil {
+		return nil, err
+	}
+	id, err := utils.Sha256FileFromReader(out)
+
+	if err != nil {
+		return nil, err
+	}
+	metaData := meta.GenerateFileMeta(file.Filename, dst, file.Size, id)
+	log.Println("%s : %s", file.Filename, id)
+	return metaData, nil
+}
+
+// GetFileMeta 获取文件元信息
+func GetFileMeta(c *gin.Context) {
+	fileID := c.Query("file_id")
+	meta, err := meta.GetFileMeta(fileID)
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+		return
+	}
+	utils.ResponseHandler(c, http.StatusOK, "File meta retrieved successfully", meta)
 }
