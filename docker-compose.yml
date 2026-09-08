@@ -1,0 +1,39 @@
+# version: '3'
+services:
+  mysql-master:
+    image: mysql:8.0
+    container_name: mysql-master
+    environment:
+      MYSQL_ROOT_PASSWORD: panyu
+      MYSQL_DATABASE: cloud-disk
+      MYSQL_USER: panyu
+      MYSQL_PASSWORD: panyu
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-master-data:/var/lib/mysql
+      - ./config/mysql/master/conf.d/:/etc/mysql/conf.d
+    networks:
+      - mysql-network
+
+  mysql-slave:
+    image: mysql:8.0
+    container_name: mysql-slave
+    environment:
+      MYSQL_ROOT_PASSWORD: panyu
+      MYSQL_DATABASE: cloud-disk
+      MYSQL_USER: panyu
+      MYSQL_PASSWORD: panyu
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-slave-data:/var/lib/mysql
+      - ./config/mysql/slave/conf.d/:/etc/mysql/conf.d
+    networks:
+      - mysql-network   
+networks:
+  mysql-network:
+    driver: bridge
+volumes:
+  mysql-master-data:
+  mysql-slave-data:

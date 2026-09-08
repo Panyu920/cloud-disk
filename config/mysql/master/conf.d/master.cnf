@@ -1,0 +1,23 @@
+[mysqld]
+# 主库唯一标识（必须为1-2^32之间的整数，且与从库不同）
+server-id = 1
+
+# 启用二进制日志（这是复制的数据源）
+log-bin = mysql-bin
+
+# 二进制日志格式（推荐ROW，能精确记录每一行变化，兼容性强）
+binlog_format = ROW
+
+# （可选）设置二进制日志保留时间（单位：秒，这里为7天）
+binlog_expire_logs_seconds = 604800
+
+# （可选）每个事务的最大大小，防止大事务阻塞复制
+max_binlog_size = 1G
+
+# （可选）需要同步的数据库（如果要指定，可取消注释并修改）
+# binlog-do-db = web_shop
+
+# （可选）忽略复制的数据库（常用于mysql系统库）
+# binlog-ignore-db = mysql
+# binlog-ignore-db = information_schema
+# binlog-ignore-db = performance_schema

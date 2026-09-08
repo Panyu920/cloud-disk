@@ -1,0 +1,27 @@
+[mysqld]
+# 从库唯一标识（必须与主库不同）
+server-id = 2
+
+# 开启从库的只读模式（超级用户除外，防止意外写入）
+read-only = 1
+
+# 中继日志文件名（用于存储从主库同步的日志）
+relay-log = mysql-relay-bin
+
+# （可选）是否允许从库记录自己的二进制日志（如果从库还要作为下一级主库，则设为1）
+log-slave-updates = 0
+
+# （可选）从库的二进制日志格式，通常与主库保持一致
+binlog_format = ROW
+
+# （可选）忽略复制的数据库（与主库保持一致）
+# replicate-ignore-db = mysql
+# replicate-ignore-db = information_schema
+# replicate-ignore-db = performance_schema
+
+# （可选）如果只想复制特定数据库，可使用以下两个参数（二选一）
+# replicate-do-db = web_shop        # 只复制该库
+# replicate-ignore-db = test_db     # 忽略该库
+
+# （推荐）跳过特定类型的复制错误（谨慎使用，生产环境建议值为0）
+# slave-skip-errors = 1062          # 跳过主键重复错误
