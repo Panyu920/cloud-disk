@@ -26,6 +26,7 @@ go.work.sum
 
 # env file
 .env
+dbml-error.log
 
 # Editor/IDE
 # .idea/

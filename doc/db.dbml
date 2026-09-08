@@ -1,0 +1,30 @@
+Project cloud_disk{
+    database_type: 'mysql'
+    Note: '数据库设计文件'
+    database_name: 'cloud_disk'
+    version: '1.0'
+    default_engine: 'InnoDB'
+    default_charset: 'utf8mb4'
+}
+
+Table files as F {
+    id integer [pk, increment]
+    file_sha1  varchar(255) [not null, unique, note: '文件的sha1值']
+    file_name varchar(255) [not null,note: '文件名']
+    file_size bigint [not null,default: 0,note: '文件大小']
+    file_addr varchar(1024) [not null, default: '',note: '文件存储地址']
+    status int [not null, default: 0,note: '文件状态(0: 正常,1:禁用, 2: 删除)']
+    create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
+    update_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '更新时间']
+    extend int [not null, default: 0,note: '扩展字段']
+    extend2 text [not null, default: '',note: '扩展字段2']
+
+    indexes {
+        status [name: 'idx_status']
+        file_sha1 [unique, name: 'idx_file_sha1']
+    }
+}
+
+Metadata table files {
+    Note: '文件表'
+}
