@@ -12,7 +12,8 @@ type FileMeta struct {
 	Location string `json:"location"`
 	UploadAt string `json:"upload_at"`
 	FileSize int64  `json:"file_size"`
-	ID       string `json:"id"`
+	FileSha1 string `json:"file_sha1"`
+	ID       int64  `json:"id"`
 }
 
 // fileMetas 文件元信息存储
@@ -30,14 +31,14 @@ func init() {
 func UpdateFileMeta(meta *FileMeta) {
 	rwlock.Lock()
 	defer rwlock.Unlock()
-	fileMetas[meta.ID] = *meta
+	fileMetas[meta.FileSha1] = *meta
 }
 
 // GetFileMeta 获取文件元信息
-func GetFileMeta(id string) (*FileMeta, error) {
+func GetFileMeta(fileSha1 string) (*FileMeta, error) {
 	rwlock.RLock()
 	defer rwlock.RUnlock()
-	if meta, ok := fileMetas[id]; ok {
+	if meta, ok := fileMetas[fileSha1]; ok {
 		return &meta, nil
 	}
 	return nil, errors.New("file not found")
@@ -46,7 +47,7 @@ func GetFileMeta(id string) (*FileMeta, error) {
 func AddFileMeta(meta *FileMeta) {
 	rwlock.Lock()
 	defer rwlock.Unlock()
-	fileMetas[meta.ID] = *meta
+	fileMetas[meta.FileSha1] = *meta
 }
 
 func RemoveFileMeta(id string) {
@@ -55,12 +56,12 @@ func RemoveFileMeta(id string) {
 	delete(fileMetas, id)
 }
 
-func GenerateFileMeta(fileName, location string, fileSize int64, id string) *FileMeta {
-	return &FileMeta{
+func GenerateFileMeta(fileName, location string, fileSize int64, fileSha1 string) FileMeta {
+	return FileMeta{
 		FileName: fileName,
 		Location: location,
 		UploadAt: time.Now().Format("2006-01-02 15:04:05"),
 		FileSize: fileSize,
-		ID:       id,
+		FileSha1: fileSha1,
 	}
 }

@@ -62,7 +62,10 @@ func Sha256File(filePath string) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
-func Sha256FileFromReader(reader io.Reader) (string, error) {
+func Sha256FileFromReader(reader io.ReadSeeker) (string, error) {
+	if _, err := reader.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
 	hash := sha256.New()
 	if _, err := io.Copy(hash, reader); err != nil {
 		return "", err
