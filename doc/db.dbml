@@ -17,7 +17,7 @@ Table files as F {
     create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
     update_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '更新时间']
     extend int [not null, default: 0,note: '扩展字段']
-    extend2 text [not null, default: '',note: '扩展字段2']
+    extend2 text [note: '扩展字段2']
 
     indexes {
         status [name: 'idx_status']

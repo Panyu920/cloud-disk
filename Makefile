@@ -1,3 +1,4 @@
+db_url =mysql://panyu:panyu@tcp(localhost:3306)/cloud-disk?multiStatements=true
 .PHONY: run remove  setup-mysql-master-slave
 
 run:
@@ -15,3 +16,18 @@ db_docs:
 
 db_schema:
 	dbml2sql ./doc/db.dbml -o ./doc/schema.sql --mysql
+
+migrateup:
+	migrate -path db/migration -database "$(db_url)" -verbose up
+
+migrateup1:
+	migrate -path db/migration -database "$(db_url)" -verbose up 1
+
+migratedown:
+	migrate -path db/migration -database "$(db_url)" -verbose down
+
+migratedown1:
+	migrate -path db/migration -database "$(db_url)" -verbose down 1
+
+new_migration:
+	migrate create -ext sql -dir db/migration -seq $(name)

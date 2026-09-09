@@ -2,3 +2,7 @@
 
     db.dbml(18,35): A setting name must be a stream of identifiers
 
+2026-09-09T03:09:06.391Z
+
+    db.dbml(20,28): Expect a non-empty attribute name
+

@@ -1,7 +1,3 @@
--- SQL dump generated using DBML (dbml.dbdiagram.io)
--- Database: MySQL
--- Generated at: 2026-09-09T03:09:40.976Z
-
 CREATE TABLE `files` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
   `file_sha1` varchar(255) UNIQUE NOT NULL COMMENT '文件的sha1值',
