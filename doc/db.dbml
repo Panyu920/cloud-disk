@@ -8,12 +8,12 @@ Project cloud_disk{
 }
 
 Table files as F {
-    id integer [pk, increment]
+    id bigint [pk, increment]
     file_sha1  varchar(255) [not null, unique, note: '文件的sha1值']
     file_name varchar(255) [not null,note: '文件名']
     file_size bigint [not null,default: 0,note: '文件大小']
     file_addr varchar(1024) [not null, default: '',note: '文件存储地址']
-    status int [not null, default: 0,note: '文件状态(0: 正常,1:禁用, 2: 删除)']
+    status tinyint [not null, default: 0,note: '文件状态(0: 正常,1:禁用, 2: 删除)']
     create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
     update_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '更新时间']
     extend int [not null, default: 0,note: '扩展字段']

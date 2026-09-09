@@ -1,5 +1,5 @@
 db_url =mysql://panyu:panyu@tcp(localhost:3306)/cloud-disk?multiStatements=true
-.PHONY: run remove  setup-mysql-master-slave
+.PHONY: run remove  setup-mysql-master-slave db_docs db_schema migrateup migrateup1 migratedown migratedown1 new_migration sqlc
 
 run:
 	go run main.go
@@ -31,3 +31,6 @@ migratedown1:
 
 new_migration:
 	migrate create -ext sql -dir db/migration -seq $(name)
+
+sqlc:
+	sqlc generate
