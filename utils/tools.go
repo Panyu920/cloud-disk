@@ -26,6 +26,20 @@ func MD5(data []byte) string {
 	md5.Write(data)
 	return hex.EncodeToString(md5.Sum(data))
 }
+func MD5String(data string) string {
+	return MD5([]byte(data))
+}
+func MD5Compare(pwd string, hash string) bool {
+	return MD5String(pwd) == hash
+}
+
+func GeneratePasswordHash(pwd string) string {
+	return MD5String(pwd)
+}
+
+func CheckPasswordHash(pwd string, hash string) bool {
+	return MD5Compare(pwd, hash)
+}
 
 func MD5File(filePath string) (string, error) {
 	file, err := os.Open(filePath)

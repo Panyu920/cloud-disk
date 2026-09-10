@@ -32,7 +32,7 @@ func CreateUserHandler(c *gin.Context) {
 	// 创建用户
 	res, err := db.StoreInstance.CreateUser(c, db.CreateUserParams{
 		Username: userParam.Username,
-		Password: userParam.Password,
+		Password: utils.GeneratePasswordHash(userParam.Password),
 		Email:    userParam.Email,
 		Phone:    userParam.Phone,
 	})
