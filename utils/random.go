@@ -8,6 +8,7 @@ import (
 
 const (
 	Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	Number   = "0123456789"
 )
 
 func RandomInt(max, min int) int {
@@ -32,4 +33,12 @@ func RandomSha1() string {
 	hash.Write([]byte(str))
 	hexStr := hex.EncodeToString(hash.Sum(nil))
 	return hexStr
+}
+
+func RandomPhone() string {
+	b := make([]byte, 11)
+	for i := range b {
+		b[i] = Number[RandomInt(len(Number)-1, 0)]
+	}
+	return string(b)
 }

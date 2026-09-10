@@ -34,3 +34,6 @@ new_migration:
 
 sqlc:
 	sqlc generate
+
+test:
+	go test ./... -cover -v
