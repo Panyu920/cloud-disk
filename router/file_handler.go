@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"database/sql"
 	"io"
 	"io/fs"
 	"log"
@@ -117,13 +118,13 @@ func saveUploadedFile(file *multipart.FileHeader, dst string, perm ...fs.FileMod
 	if err != nil {
 		return meta.FileMeta{}, err
 	}
-	id, err := utils.Sha256FileFromReader(out)
+	fileSha1, err := utils.Sha256FileFromReader(out)
 
 	if err != nil {
 		return meta.FileMeta{}, err
 	}
-	metaData := meta.GenerateFileMeta(file.Filename, dst, file.Size, id)
-	log.Printf("%s : %s\n", file.Filename, id)
+	metaData := meta.GenerateFileMeta(file.Filename, dst, file.Size, fileSha1)
+	// log.Printf("%s : %s\n", file.Filename, id)
 	return metaData, nil
 }
 
@@ -157,7 +158,7 @@ func HandleDownload(c *gin.Context) {
 }
 
 type UpdateFileMetaRequest struct {
-	FileID   string `json:"file_id" binding:"required"`
+	FileID   int64  `json:"file_id" binding:"required"`
 	FileName string `json:"file_name" binding:"required"`
 }
 
@@ -169,16 +170,32 @@ func UpdateFileMeta(c *gin.Context) {
 		return
 	}
 
-	metaData, err := meta.GetFileMeta(req.FileID)
+	// metaData, err := meta.GetFileMeta(req.FileID)
+	// if err != nil {
+	// 	utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+	// 	return
+	// }
+
+	updateFileParams := db.UpdateFileParams{
+		ID:       req.FileID,
+		FileName: sql.NullString{Valid: true, String: req.FileName},
+	}
+	res, err := db.StoreInstance.UpdateFile(c, updateFileParams)
 	if err != nil {
-		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+		utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to update file record", nil)
 		return
 	}
 
-	metaData.FileName = req.FileName
-	meta.UpdateFileMeta(metaData)
+	_, err = res.RowsAffected()
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to update file record", nil)
+		return
+	}
 
-	utils.ResponseHandler(c, http.StatusOK, "File meta updated successfully", metaData)
+	// metaData.FileName = req.FileName
+	// meta.UpdateFileMeta(metaData)
+
+	utils.ResponseHandler(c, http.StatusOK, "File meta updated successfully", nil)
 }
 
 // DeleteFile 删除文件及其元信息
@@ -189,14 +206,11 @@ func DeleteFile(c *gin.Context) {
 		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
 		return
 	}
-
 	err = os.Remove(metaData.Location)
 	if err != nil {
 		utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to delete file", nil)
 		return
 	}
-
 	meta.RemoveFileMeta(fileID)
-
 	utils.ResponseHandler(c, http.StatusOK, "File deleted successfully", nil)
 }

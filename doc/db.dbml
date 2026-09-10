@@ -28,3 +28,22 @@ Table files as F {
 Metadata table files {
     Note: '文件表'
 }
+
+Table users as U {
+    id bigint [pk, increment]
+    username varchar(255) [not null, unique, note: '用户名']
+    password varchar(255) [not null, note: '密码']
+    create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
+    email varchar(128) [not null, unique, note: '邮箱']
+    phone varchar(128) [not null, unique, note: '手机号']
+    email_verified bool [not null, default: 0,note: '邮箱是否验证']
+    phone_verified bool [not null, default: 0,note: '手机号是否验证']
+    profile text [note: '用户信息']
+    status tinyint [not null, default: 0,note: '用户状态(0: 正常,1:禁用, 2: 删除)']
+
+    indexes {
+        username [unique, name: 'idx_username']
+        email [unique, name: 'idx_email']
+        phone [unique, name: 'idx_phone']
+    }
+}
