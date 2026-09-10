@@ -1,9 +1,13 @@
 package router
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
+	"time"
 
 	db "github.com/Panyu920/cloud-disk/db/sqlc"
+	"github.com/Panyu920/cloud-disk/token"
 	"github.com/Panyu920/cloud-disk/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -62,4 +66,55 @@ func CreateUserHandler(c *gin.Context) {
 		Phone:    userParam.Phone,
 	})
 
+}
+
+type LoginRequest struct {
+	Username string `json:"username" binding:"required,min=4,max=20"`
+	Password string `json:"password" binding:"required,min=4,max=20"`
+}
+
+type LoginResponse struct {
+	Token     string    `json:"token"`
+	ExpiredAt time.Time `json:"expired_at"`
+}
+
+// LoginHandler 登录用户
+func LoginHandler(c *gin.Context) {
+	var loginParam LoginRequest
+	if err := c.ShouldBindJSON(&loginParam); err != nil {
+		utils.ResponseHandler(c, http.StatusBadRequest, err.Error(), nil)
+		return
+	}
+
+	// 验证用户密码
+	user, err := db.StoreInstance.GetUserByUsername(c, loginParam.Username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// 用户不存在
+			utils.ResponseHandler(c, http.StatusUnauthorized, "invalid username or password", nil)
+			return
+		}
+		// 其他错误
+		utils.ResponseHandler(c, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	// 验证密码
+	if !utils.CheckPasswordHash(loginParam.Password, user.Password) {
+		utils.ResponseHandler(c, http.StatusUnauthorized, "invalid username or password", nil)
+		return
+	}
+
+	// 生成登录令牌
+	token, payload, err := token.DefaultMaker.CreateToken(loginParam.Username, user.ID, token.DefaultDuration)
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	// 返回成功响应
+	utils.ResponseHandler(c, http.StatusOK, "login success", LoginResponse{
+		Token:     token,
+		ExpiredAt: payload.ExpiresAt.Time,
+	})
 }

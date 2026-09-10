@@ -1,6 +1,8 @@
 package server
 
 import (
+	"log"
+
 	"github.com/Panyu920/cloud-disk/router"
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +27,7 @@ func (s *Server) Start() error {
 	s.ginEnine.MaxMultipartMemory = 10 << 20 // 10MB
 	// 注册路由
 	s.rigisterRoutes()
+	PrintRoutes()
 	return s.ginEnine.Run(s.addr)
 }
 
@@ -45,4 +48,19 @@ func (s *Server) rigisterRoutes() {
 
 	// 创建用户
 	s.ginEnine.POST("/user", router.CreateUserHandler)
+	// 登录
+	s.ginEnine.POST("/user/login", router.LoginHandler)
+
+}
+
+func PrintRoutes() {
+
+	log.Println("GET /index  首页")
+	log.Println("POST /file  文件上传")
+	log.Println("GET /file/meta  获取文件元信息")
+	log.Println("GET /file  处理文件下载请求")
+	log.Println("PUT /file/meta  更新文件元信息")
+	log.Println("DELETE /file  删除文件")
+	log.Println("POST /user  创建用户")
+	log.Println("POST /user/login  登录")
 }

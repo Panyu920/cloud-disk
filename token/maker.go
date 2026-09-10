@@ -8,6 +8,7 @@ import (
 var (
 	ErrInvalidToken = errors.New("invalid token")
 	ErrExpiredToken = errors.New("expired token")
+	DefaultDuration = time.Hour * 24
 )
 
 type TokenMaker interface {
