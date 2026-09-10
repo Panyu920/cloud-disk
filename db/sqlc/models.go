@@ -30,3 +30,29 @@ type File struct {
 	// 扩展字段2
 	Extend2 sql.NullString `json:"extend2"`
 }
+
+type User struct {
+	ID int64 `json:"id"`
+	// 用户名
+	Username string `json:"username"`
+	// 密码
+	Password string `json:"password"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 更新时间
+	UpdateAt time.Time `json:"update_at"`
+	// 最后登录时间
+	LastLoginAt sql.NullTime `json:"last_login_at"`
+	// 邮箱
+	Email string `json:"email"`
+	// 手机号
+	Phone string `json:"phone"`
+	// 邮箱是否验证
+	EmailVerified bool `json:"email_verified"`
+	// 手机号是否验证
+	PhoneVerified bool `json:"phone_verified"`
+	// 用户信息
+	Profile sql.NullString `json:"profile"`
+	// 用户状态(0: 正常,1:禁用, 2: 删除)
+	Status int8 `json:"status"`
+}

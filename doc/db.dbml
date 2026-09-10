@@ -34,6 +34,8 @@ Table users as U {
     username varchar(255) [not null, unique, note: '用户名']
     password varchar(255) [not null, note: '密码']
     create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
+    update_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '更新时间']
+    last_login_at timestamp [note: '最后登录时间']
     email varchar(128) [not null, unique, note: '邮箱']
     phone varchar(128) [not null, unique, note: '手机号']
     email_verified bool [not null, default: 0,note: '邮箱是否验证']

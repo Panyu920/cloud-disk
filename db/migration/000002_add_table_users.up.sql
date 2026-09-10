@@ -3,6 +3,8 @@ CREATE TABLE `users` (
   `username` varchar(255) UNIQUE NOT NULL COMMENT '用户名',
   `password` varchar(255) NOT NULL COMMENT '密码',
   `create_at` timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP) COMMENT '创建时间',
+  `update_at` timestamp NOT NULL DEFAULT (CURRENT_TIMESTAMP) COMMENT '更新时间',
+  `last_login_at` timestamp COMMENT '最后登录时间',
   `email` varchar(128) UNIQUE NOT NULL COMMENT '邮箱',
   `phone` varchar(128) UNIQUE NOT NULL COMMENT '手机号',
   `email_verified` bool NOT NULL DEFAULT 0 COMMENT '邮箱是否验证',
