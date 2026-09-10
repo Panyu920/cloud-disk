@@ -42,4 +42,7 @@ func (s *Server) rigisterRoutes() {
 	s.ginEnine.PUT("/file/meta", router.UpdateFileMeta)
 	// 删除文件
 	s.ginEnine.DELETE("/file", router.DeleteFile)
+
+	// 创建用户
+	s.ginEnine.POST("/user", router.CreateUserHandler)
 }
