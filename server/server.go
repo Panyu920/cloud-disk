@@ -5,6 +5,8 @@ import (
 
 	"github.com/Panyu920/cloud-disk/router"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 type Server struct {
@@ -25,6 +27,9 @@ func New(addr string) *Server {
 func (s *Server) Start() error {
 	// 设置文件上传大小限制为 10MB
 	s.ginEnine.MaxMultipartMemory = 10 << 20 // 10MB
+	// 注册字段验证器
+	registerValidators()
+
 	// 注册路由
 	s.rigisterRoutes()
 	PrintRoutes()
@@ -65,4 +70,12 @@ func PrintRoutes() {
 	log.Println("DELETE /file  删除文件")
 	log.Println("POST /user  创建用户")
 	log.Println("POST /user/login  登录")
+}
+
+func registerValidators() {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("phone", phoneValidator)
+	} else {
+		log.Fatalf("validator.Engine() is not *validator.Validate")
+	}
 }
