@@ -3,3 +3,5 @@
 3.prepared_queries
 4.配置日志
 5.使用goroutine 优化文件上传
+6.使用docker打包应用
+7.添加配置文件

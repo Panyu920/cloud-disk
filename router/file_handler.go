@@ -147,14 +147,16 @@ func GetFileMeta(c *gin.Context) {
 
 // HandleDownload 处理文件下载请求
 func HandleDownload(c *gin.Context) {
-	fileID := c.Query("file_id")
-	meta, err := meta.GetFileMeta(fileID)
+	fileIDStr := c.Query("file_id")
+	// meta, err := meta.GetFileMeta(fileID)
+	fileID, err := strconv.ParseInt(fileIDStr, 10, 64)
+	meta, err := db.StoreInstance.GetFileById(context.Background(), fileID)
 	if err != nil {
 		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
 		return
 	}
 
-	c.FileAttachment(meta.Location, meta.FileName)
+	c.FileAttachment(meta.FileAddr, meta.FileName)
 }
 
 type UpdateFileMetaRequest struct {

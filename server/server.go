@@ -35,21 +35,23 @@ func (s *Server) Start() error {
 func (s *Server) rigisterRoutes() {
 	// 首页
 	s.ginEnine.GET("/index", router.HandleIndex)
-	// 文件上传
-	s.ginEnine.POST("/file", router.HandleUpload)
-	// 获取文件元信息
-	s.ginEnine.GET("/file/meta", router.GetFileMeta)
-	// 处理文件下载请求
-	s.ginEnine.GET("/file", router.HandleDownload)
-	// 更新文件元信息
-	s.ginEnine.PUT("/file/meta", router.UpdateFileMeta)
-	// 删除文件
-	s.ginEnine.DELETE("/file", router.DeleteFile)
-
 	// 创建用户
 	s.ginEnine.POST("/user", router.CreateUserHandler)
 	// 登录
 	s.ginEnine.POST("/user/login", router.LoginHandler)
+
+	// 验证路由
+	authRouter := s.ginEnine.Group("/").Use(authMiddleware())
+	// 文件上传
+	authRouter.POST("/file", router.HandleUpload)
+	// 获取文件元信息
+	authRouter.GET("/file/meta", router.GetFileMeta)
+	// 处理文件下载请求
+	authRouter.GET("/file", router.HandleDownload)
+	// 更新文件元信息
+	authRouter.PUT("/file/meta", router.UpdateFileMeta)
+	// 删除文件
+	authRouter.DELETE("/file", router.DeleteFile)
 
 }
 
