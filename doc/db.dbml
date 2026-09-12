@@ -9,8 +9,7 @@ Project cloud_disk{
 
 Table files as F {
     id bigint [pk, increment]
-    file_sha1  varchar(255) [not null, unique, note: '文件的sha1值']
-    file_name varchar(255) [not null,note: '文件名']
+    file_sha1  varchar(255) [not null,  note: '文件的sha1值']
     file_size bigint [not null,default: 0,note: '文件大小']
     file_addr varchar(1024) [not null, default: '',note: '文件存储地址']
     status tinyint [not null, default: 0,note: '文件状态(0: 正常,1:禁用, 2: 删除)']
@@ -21,13 +20,11 @@ Table files as F {
 
     indexes {
         status [name: 'idx_status']
-        file_sha1 [unique, name: 'idx_file_sha1']
+        (file_size, file_sha1) [unique, name: 'idx_file_size_file_sha1']
     }
 }
 
-Metadata table files {
-    Note: '文件表'
-}
+
 
 Table users as U {
     id bigint [pk, increment]
@@ -49,3 +46,19 @@ Table users as U {
         phone [unique, name: 'idx_phone']
     }
 }
+
+Table file_users as FU {
+    id bigint [pk, increment]
+    username varchar(255) [not null, note: '用户名',ref:> U.username]
+    file_sha1 varchar(255) [not null, note: '文件的sha1值',ref:> F.file_sha1]
+    file_size bigint [not null,default: 0,note: '文件大小']
+    filename varchar(255) [not null, note: '文件名']
+    create_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '创建时间']
+    update_at timestamp [not null, default: `CURRENT_TIMESTAMP`,note: '更新时间']
+
+    status tinyint [not null, default: 0,note: '文件用户状态(0: 正常,1:禁用, 2: 删除)']
+
+    indexes {
+        (username,filename, file_sha1) [unique, name: 'idx_username_filename_file_sha1']
+    }
+}   
