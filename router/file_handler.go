@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"io"
 	"io/fs"
 	"log"
@@ -14,6 +15,7 @@ import (
 
 	db "github.com/Panyu920/cloud-disk/db/sqlc"
 	"github.com/Panyu920/cloud-disk/meta"
+	"github.com/Panyu920/cloud-disk/token"
 	"github.com/Panyu920/cloud-disk/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -25,13 +27,13 @@ func HandleIndex(c *gin.Context) {
 }
 
 type UploadRequest struct {
-	Name  string                  `form:"name" binding:"required"`
-	Email string                  `form:"email" binding:"required,email"`
-	Files []*multipart.FileHeader `form:"file" binding:"required"`
+	Username string                  `form:"username" binding:"required"`
+	Email    string                  `form:"email" binding:"required,email"`
+	Files    []*multipart.FileHeader `form:"file" binding:"required"`
 }
 type UploadResponse struct {
 	FileMetas []meta.FileMeta `json:"file_metas"`
-	Name      string          `json:"name"`
+	Username  string          `json:"username"`
 	Email     string          `json:"email"`
 }
 
@@ -41,6 +43,21 @@ func HandleUpload(c *gin.Context) {
 		utils.ResponseHandler(c, http.StatusBadRequest, "Invalid form data", nil)
 		return
 	}
+	// 从上下文获取 payload
+	payload, ok := c.Get(AuthorizationPayloadKey)
+	if !ok {
+		utils.ResponseHandler(c, http.StatusUnauthorized, "Unauthorized", nil)
+		return
+	}
+
+	// 校验 payload 中的 username 是否与 form 中的 username 一致
+	p := payload.(*token.Payload)
+	if p.Username != form.Username {
+		println(p.Username, form.Username)
+		utils.ResponseHandler(c, http.StatusUnauthorized, "Unauthorized", nil)
+		return
+	}
+
 	fileMetas := make([]meta.FileMeta, len(form.Files))
 
 	// 保存上传的文件到指定路径
@@ -80,9 +97,24 @@ func HandleUpload(c *gin.Context) {
 	// 	fileNames = append(fileNames, fileHeader.Filename)
 	// }
 
+	// 创建file_user 记录
+	for i := range fileMetas {
+		_, err := db.StoreInstance.CreateFileUser(c, db.CreateFileUserParams{
+			Username: p.Username,
+			FileSha1: fileMetas[i].FileSha1,
+			FileSize: fileMetas[i].FileSize,
+			Filename: fileMetas[i].FileName,
+		})
+		if err != nil {
+			log.Println("err:", err)
+			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to create file_user record", nil)
+			return
+		}
+	}
+
 	utils.ResponseHandler(c, http.StatusOK, "File uploaded successfully", UploadResponse{
 		FileMetas: fileMetas,
-		Name:      form.Name,
+		Username:  form.Username,
 		Email:     form.Email,
 	})
 }
@@ -215,4 +247,67 @@ func DeleteFile(c *gin.Context) {
 	}
 	meta.RemoveFileMeta(fileID)
 	utils.ResponseHandler(c, http.StatusOK, "File deleted successfully", nil)
+}
+
+type FastUploadRequest struct {
+	Username string `json:"username" binding:"required"`
+	Filename string `json:"filename" binding:"required"`
+	FileSize int64  `json:"file_size" binding:"required"`
+	FileSha1 string `json:"file_sha1" binding:"required"`
+}
+
+type FastUploadResponse struct {
+	FileID int64 `json:"file_id"`
+}
+
+func FastUploadHandler(c *gin.Context) {
+	var req FastUploadRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ResponseHandler(c, http.StatusBadRequest, "Invalid request data", nil)
+		return
+	}
+
+	payloadS, ok := c.Get(AuthorizationPayloadKey)
+	if !ok {
+		utils.ResponseHandler(c, http.StatusForbidden, "forbiddend upload", nil)
+		return
+	}
+	payload := payloadS.(*token.Payload)
+	if payload.Username != req.Username {
+		utils.ResponseHandler(c, http.StatusForbidden, "forbiddend upload", nil)
+		return
+	}
+
+	file, err := db.StoreInstance.GetFileBySha1AndSize(c, db.GetFileBySha1AndSizeParams{
+		FileSha1: req.FileSha1,
+		FileSize: req.FileSize,
+	})
+	if err != nil {
+		// 文件不存在
+		if errors.Is(err, sql.ErrNoRows) {
+			utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
+			return
+		}
+		utils.ResponseHandler(c, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	// 文件已存在
+
+	// 创建文件用户关联
+	_, err = db.StoreInstance.CreateFileUser(c, db.CreateFileUserParams{
+		Username: req.Username,
+		FileSha1: req.FileSha1,
+		FileSize: req.FileSize,
+		Filename: req.Filename,
+	})
+
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+
+	utils.ResponseHandler(c, http.StatusOK, "File uploaded successfully", FastUploadResponse{
+		FileID: file.ID,
+	})
 }

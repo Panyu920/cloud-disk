@@ -46,7 +46,7 @@ func (s *Server) rigisterRoutes() {
 	s.ginEnine.POST("/user/login", router.LoginHandler)
 
 	// 验证路由
-	authRouter := s.ginEnine.Group("/").Use(authMiddleware())
+	authRouter := s.ginEnine.Group("/").Use(router.AuthMiddleware())
 	// 文件上传
 	authRouter.POST("/file", router.HandleUpload)
 	// 获取文件元信息
@@ -57,6 +57,8 @@ func (s *Server) rigisterRoutes() {
 	authRouter.PUT("/file/meta", router.UpdateFileMeta)
 	// 删除文件
 	authRouter.DELETE("/file", router.DeleteFile)
+	// 文件秒传
+	authRouter.POST("/file/fast", router.FastUploadHandler)
 
 }
 
@@ -74,7 +76,7 @@ func PrintRoutes() {
 
 func registerValidators() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("phone", phoneValidator)
+		v.RegisterValidation("phone", router.PhoneValidator)
 	} else {
 		log.Fatalf("validator.Engine() is not *validator.Validate")
 	}

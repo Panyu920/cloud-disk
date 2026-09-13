@@ -11,14 +11,17 @@ import (
 
 type Querier interface {
 	CreateFile(ctx context.Context, arg CreateFileParams) (sql.Result, error)
+	CreateFileUser(ctx context.Context, arg CreateFileUserParams) (sql.Result, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error)
 	GetFileById(ctx context.Context, id int64) (File, error)
-	GetFileBySha1(ctx context.Context, fileSha1 string) (File, error)
+	GetFileBySha1AndSize(ctx context.Context, arg GetFileBySha1AndSizeParams) (File, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByPhone(ctx context.Context, phone string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	GetUserFilesByUsername(ctx context.Context, arg GetUserFilesByUsernameParams) ([]FileUser, error)
 	UpdateFile(ctx context.Context, arg UpdateFileParams) (sql.Result, error)
+	UpdateFileUserStatus(ctx context.Context, arg UpdateFileUserStatusParams) (sql.Result, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (sql.Result, error)
 }
 

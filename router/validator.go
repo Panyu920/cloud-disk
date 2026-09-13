@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"github.com/Panyu920/cloud-disk/utils"
@@ -6,7 +6,7 @@ import (
 )
 
 // phoneValidator 验证手机号是否符合格式
-var phoneValidator = func(fl validator.FieldLevel) bool {
+var PhoneValidator = func(fl validator.FieldLevel) bool {
 	phone := fl.Field().String()
 	return utils.IsValidPhone(phone)
 }

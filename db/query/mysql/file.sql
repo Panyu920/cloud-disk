@@ -3,8 +3,8 @@ INSERT INTO files (
     file_sha1, file_name, file_size, file_addr )
      VALUES (?, ?, ?, ?);
     
--- name: GetFileBySha1 :one
-SELECT * FROM files WHERE file_sha1 = ? limit 1;
+-- name: GetFileBySha1AndSize :one
+SELECT * FROM files WHERE file_sha1 = ? AND file_size = ? limit 1;
 
 -- name: GetFileById :one
 SELECT * FROM files WHERE id = ? limit 1;

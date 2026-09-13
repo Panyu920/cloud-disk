@@ -48,7 +48,10 @@ func TestGetFileBySha1(t *testing.T) {
 	file := createRandomFile(t)
 
 	// Call the GetFileBySha1 method
-	retrievedFile, err := testQueries.GetFileBySha1(context.Background(), file.FileSha1)
+	retrievedFile, err := testQueries.GetFileBySha1AndSize(context.Background(), GetFileBySha1AndSizeParams{
+		FileSha1: file.FileSha1,
+		FileSize: file.FileSize,
+	})
 	require.NoError(t, err)
 
 	// Verify that the retrieved file matches the created file

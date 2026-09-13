@@ -54,12 +54,17 @@ func (q *Queries) GetFileById(ctx context.Context, id int64) (File, error) {
 	return i, err
 }
 
-const getFileBySha1 = `-- name: GetFileBySha1 :one
-SELECT id, file_sha1, file_name, file_size, file_addr, status, create_at, update_at, extend, extend2 FROM files WHERE file_sha1 = ? limit 1
+const getFileBySha1AndSize = `-- name: GetFileBySha1AndSize :one
+SELECT id, file_sha1, file_name, file_size, file_addr, status, create_at, update_at, extend, extend2 FROM files WHERE file_sha1 = ? AND file_size = ? limit 1
 `
 
-func (q *Queries) GetFileBySha1(ctx context.Context, fileSha1 string) (File, error) {
-	row := q.db.QueryRowContext(ctx, getFileBySha1, fileSha1)
+type GetFileBySha1AndSizeParams struct {
+	FileSha1 string `json:"file_sha1"`
+	FileSize int64  `json:"file_size"`
+}
+
+func (q *Queries) GetFileBySha1AndSize(ctx context.Context, arg GetFileBySha1AndSizeParams) (File, error) {
+	row := q.db.QueryRowContext(ctx, getFileBySha1AndSize, arg.FileSha1, arg.FileSize)
 	var i File
 	err := row.Scan(
 		&i.ID,

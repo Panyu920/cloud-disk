@@ -31,6 +31,24 @@ type File struct {
 	Extend2 sql.NullString `json:"extend2"`
 }
 
+type FileUser struct {
+	ID int64 `json:"id"`
+	// 用户名
+	Username string `json:"username"`
+	// 文件的sha1值
+	FileSha1 string `json:"file_sha1"`
+	// 文件大小
+	FileSize int64 `json:"file_size"`
+	// 文件名
+	Filename string `json:"filename"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 更新时间
+	UpdateAt time.Time `json:"update_at"`
+	// 文件用户状态(0: 正常,1:禁用, 2: 删除)
+	Status int8 `json:"status"`
+}
+
 type User struct {
 	ID int64 `json:"id"`
 	// 用户名

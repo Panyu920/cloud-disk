@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"errors"
@@ -23,7 +23,7 @@ var (
 	ErrAuthorizationTokenInvalid  = errors.New("Authorization token is invalid")
 )
 
-func authMiddleware() gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 检查请求头是否包含 Authorization 字段
 		authHeader := c.GetHeader(AuthorizationHeaderKey)
