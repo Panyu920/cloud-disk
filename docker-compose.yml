@@ -15,6 +15,7 @@ services:
       - ./config/mysql/master/conf.d/:/etc/mysql/conf.d
     networks:
       - mysql-network
+    restart: unless-stopped
 
   mysql-slave:
     image: mysql:8.0
@@ -31,9 +32,27 @@ services:
       - ./config/mysql/slave/conf.d/:/etc/mysql/conf.d
     networks:
       - mysql-network   
-networks:
-  mysql-network:
-    driver: bridge
+    restart: unless-stopped
+    depends_on:
+      - mysql-master
+      
+
+  redis-data:
+    image: redis:8.10.1-alpine
+    container_name: redis-data
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data-volume:/data
+      - ./cache/user.acl:/usr/local/etc/redis/user.acl:ro
+    command: redis-server --aclfile /usr/local/etc/redis/user.acl --appendonly yes
+
 volumes:
   mysql-master-data:
   mysql-slave-data:
+  redis-data-volume:
+
+networks:
+  mysql-network:
+    driver: bridge
