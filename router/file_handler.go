@@ -74,7 +74,7 @@ func HandleUpload(c *gin.Context) {
 		// meta.AddFileMeta(filemeta)
 		result, err := db.StoreInstance.CreateFile(c, db.CreateFileParams{
 			FileSha1: fileMetas[i].FileSha1,
-			FileName: fileMetas[i].FileName,
+			// FileName: fileMetas[i].FileName,
 			FileSize: fileMetas[i].FileSize,
 			FileAddr: fileMetas[i].Location,
 		})

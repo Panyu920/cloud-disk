@@ -59,6 +59,18 @@ func (s *Server) rigisterRoutes() {
 	authRouter.DELETE("/file", router.DeleteFile)
 	// 文件秒传
 	authRouter.POST("/file/fast", router.FastUploadHandler)
+	// 初始化多块上传
+	authRouter.POST("/upload/init", router.InitMultiPartUploadHandler)
+	// 上传多块文件
+	authRouter.POST("/upload/part", router.UploadPartHandler)
+	// 完成多块上传
+	authRouter.POST("/upload/complete", router.CompleteMultiPartUploadHandler)
+	// 取消多块上传
+	authRouter.POST("/upload/cancel", router.CancelMultiPartUploadHandler)
+	// 获取多块上传状态
+	authRouter.GET("/upload/status", router.GetMultiPartUploadInfoHandler)
+	// 继续多块上传
+	authRouter.POST("/upload/continue", router.ContinueMultiPartUploadHandler)
 
 }
 

@@ -12,24 +12,18 @@ import (
 
 const createFile = `-- name: CreateFile :execresult
 INSERT INTO files (
-    file_sha1, file_name, file_size, file_addr )
-     VALUES (?, ?, ?, ?)
+    file_sha1, file_size, file_addr )
+     VALUES ( ?, ?, ?)
 `
 
 type CreateFileParams struct {
 	FileSha1 string `json:"file_sha1"`
-	FileName string `json:"file_name"`
 	FileSize int64  `json:"file_size"`
 	FileAddr string `json:"file_addr"`
 }
 
 func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createFile,
-		arg.FileSha1,
-		arg.FileName,
-		arg.FileSize,
-		arg.FileAddr,
-	)
+	return q.db.ExecContext(ctx, createFile, arg.FileSha1, arg.FileSize, arg.FileAddr)
 }
 
 const getFileById = `-- name: GetFileById :one

@@ -14,7 +14,7 @@ func createRandomFile(t *testing.T) File {
 	// Create a new file
 	file := CreateFileParams{
 		FileSha1: utils.RandomSha1(),
-		FileName: utils.RandomString(10),
+		// FileName: utils.RandomString(10),
 		FileSize: utils.RandomInt64(100000, 100),
 		FileAddr: utils.RandomString(20),
 	}

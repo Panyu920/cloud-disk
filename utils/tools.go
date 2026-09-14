@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
+
+	"github.com/google/uuid"
 )
 
 func GetFileSize(filePath string) (int64, error) {
@@ -85,4 +87,9 @@ func Sha256FileFromReader(reader io.ReadSeeker) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+func GenerateUUID() string {
+	uuid := uuid.New()
+	return uuid.String()
 }
