@@ -11,7 +11,6 @@ SELECT * FROM files WHERE id = ? limit 1;
 
 -- name: UpdateFile :execresult
 UPDATE files SET 
-    file_name = coalesce(sqlc.narg(file_name), file_name),
     file_size = coalesce(sqlc.narg(file_size), file_size),
     file_addr = coalesce(sqlc.narg(file_addr), file_addr),
     status = coalesce(sqlc.narg(status), status),

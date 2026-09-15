@@ -37,3 +37,6 @@ sqlc:
 
 test:
 	go test ./... -cover -v
+
+create_ceph_user:
+	@chmod +x ./scripts/create_ceph_user.sh && ./scripts/create_ceph_user.sh

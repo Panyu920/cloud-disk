@@ -15,6 +15,7 @@ import (
 
 	db "github.com/Panyu920/cloud-disk/db/sqlc"
 	"github.com/Panyu920/cloud-disk/meta"
+	"github.com/Panyu920/cloud-disk/store/ceph"
 	"github.com/Panyu920/cloud-disk/token"
 	"github.com/Panyu920/cloud-disk/utils"
 	"github.com/gin-gonic/gin"
@@ -27,9 +28,10 @@ func HandleIndex(c *gin.Context) {
 }
 
 type UploadRequest struct {
-	Username string                  `form:"username" binding:"required"`
-	Email    string                  `form:"email" binding:"required,email"`
-	Files    []*multipart.FileHeader `form:"file" binding:"required"`
+	Username string `form:"username" binding:"required"`
+	Email    string `form:"email" binding:"required,email"`
+
+	Files []*multipart.FileHeader `form:"file" binding:"required"`
 }
 type UploadResponse struct {
 	FileMetas []meta.FileMeta `json:"file_metas"`
@@ -71,12 +73,19 @@ func HandleUpload(c *gin.Context) {
 			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to save file", nil)
 			return
 		}
+		// 上传文件到 ceph
+		err = ceph.UploadObject("cloud-disk", fileMetas[i].FileSha1, dst)
+		if err != nil {
+			utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to upload file", nil)
+			return
+		}
+
 		// meta.AddFileMeta(filemeta)
 		result, err := db.StoreInstance.CreateFile(c, db.CreateFileParams{
 			FileSha1: fileMetas[i].FileSha1,
 			// FileName: fileMetas[i].FileName,
 			FileSize: fileMetas[i].FileSize,
-			FileAddr: fileMetas[i].Location,
+			FileAddr: fileMetas[i].FileSha1,
 		})
 		if err != nil {
 			log.Println("err:", err)
@@ -184,11 +193,17 @@ func HandleDownload(c *gin.Context) {
 	fileID, err := strconv.ParseInt(fileIDStr, 10, 64)
 	meta, err := db.StoreInstance.GetFileById(context.Background(), fileID)
 	if err != nil {
+		log.Println("err:", err)
 		utils.ResponseHandler(c, http.StatusNotFound, "File not found", nil)
 		return
 	}
-
-	c.FileAttachment(meta.FileAddr, meta.FileName)
+	file, err := ceph.GetObject("cloud-disk", meta.FileAddr)
+	defer file.Close()
+	if err != nil {
+		utils.ResponseHandler(c, http.StatusInternalServerError, "Failed to download file", nil)
+		return
+	}
+	io.Copy(c.Writer, file)
 }
 
 type UpdateFileMetaRequest struct {
@@ -211,8 +226,8 @@ func UpdateFileMeta(c *gin.Context) {
 	// }
 
 	updateFileParams := db.UpdateFileParams{
-		ID:       req.FileID,
-		FileName: sql.NullString{Valid: true, String: req.FileName},
+		ID: req.FileID,
+		// FileName: sql.NullString{Valid: true, String: req.FileName},
 	}
 	res, err := db.StoreInstance.UpdateFile(c, updateFileParams)
 	if err != nil {

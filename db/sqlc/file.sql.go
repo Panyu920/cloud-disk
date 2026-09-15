@@ -27,7 +27,7 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) (sql.Res
 }
 
 const getFileById = `-- name: GetFileById :one
-SELECT id, file_sha1, file_name, file_size, file_addr, status, create_at, update_at, extend, extend2 FROM files WHERE id = ? limit 1
+SELECT id, file_sha1, file_size, file_addr, status, create_at, update_at, extend, extend2 FROM files WHERE id = ? limit 1
 `
 
 func (q *Queries) GetFileById(ctx context.Context, id int64) (File, error) {
@@ -36,7 +36,6 @@ func (q *Queries) GetFileById(ctx context.Context, id int64) (File, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.FileSha1,
-		&i.FileName,
 		&i.FileSize,
 		&i.FileAddr,
 		&i.Status,
@@ -49,7 +48,7 @@ func (q *Queries) GetFileById(ctx context.Context, id int64) (File, error) {
 }
 
 const getFileBySha1AndSize = `-- name: GetFileBySha1AndSize :one
-SELECT id, file_sha1, file_name, file_size, file_addr, status, create_at, update_at, extend, extend2 FROM files WHERE file_sha1 = ? AND file_size = ? limit 1
+SELECT id, file_sha1, file_size, file_addr, status, create_at, update_at, extend, extend2 FROM files WHERE file_sha1 = ? AND file_size = ? limit 1
 `
 
 type GetFileBySha1AndSizeParams struct {
@@ -63,7 +62,6 @@ func (q *Queries) GetFileBySha1AndSize(ctx context.Context, arg GetFileBySha1And
 	err := row.Scan(
 		&i.ID,
 		&i.FileSha1,
-		&i.FileName,
 		&i.FileSize,
 		&i.FileAddr,
 		&i.Status,
@@ -77,7 +75,6 @@ func (q *Queries) GetFileBySha1AndSize(ctx context.Context, arg GetFileBySha1And
 
 const updateFile = `-- name: UpdateFile :execresult
 UPDATE files SET 
-    file_name = coalesce(?, file_name),
     file_size = coalesce(?, file_size),
     file_addr = coalesce(?, file_addr),
     status = coalesce(?, status),
@@ -88,7 +85,6 @@ WHERE id = ?
 `
 
 type UpdateFileParams struct {
-	FileName sql.NullString `json:"file_name"`
 	FileSize sql.NullInt64  `json:"file_size"`
 	FileAddr sql.NullString `json:"file_addr"`
 	Status   sql.NullInt16  `json:"status"`
@@ -99,7 +95,6 @@ type UpdateFileParams struct {
 
 func (q *Queries) UpdateFile(ctx context.Context, arg UpdateFileParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, updateFile,
-		arg.FileName,
 		arg.FileSize,
 		arg.FileAddr,
 		arg.Status,

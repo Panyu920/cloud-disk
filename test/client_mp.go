@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"bytes"
@@ -505,7 +505,7 @@ func hashReader(r io.Reader) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func main() {
+func main1() {
 	ctx := context.Background()
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InBhbnl1MyIsInVzZXJfaWQiOjIsImV4cCI6MTc4OTQ0NjQ1MCwiaWF0IjoxNzg5MzYwMDUwLCJqdGkiOiIwMWEwOWUyYi05MWZkLTdlMmYtOTYyMi03YWY3ZGM1NTg4Y2EifQ.GkE6HkVZ1wvjEARq20NJ288JYgz2KI5PQ9QXQq5EF_E"
 	client := NewClient("http://localhost:8080", "panyu3", token)

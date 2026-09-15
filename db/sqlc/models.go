@@ -13,8 +13,6 @@ type File struct {
 	ID int64 `json:"id"`
 	// 文件的sha1值
 	FileSha1 string `json:"file_sha1"`
-	// 文件名
-	FileName string `json:"file_name"`
 	// 文件大小
 	FileSize int64 `json:"file_size"`
 	// 文件存储地址
