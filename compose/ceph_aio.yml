@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  ceph:
+    image: quay.io/benjamin_holmes/ceph-aio:v18
+    container_name: ceph-aio
+    hostname: ceph-aio
+    privileged: true
+    restart: unless-stopped
+    ports:
+      # - "3300:3300"   # MON，不需要对外暴露
+      # - "6789:6789"   # MON 旧协议，不需要对外暴露
+      - "8000:8000"   # RGW S3
+      - "8443:8443"   # Dashboard
+    environment:
+      OSD_COUNT: 3
+      OSD_SIZE: 2G
+      OSD_MEMORY_TARGET: 1073741824   # 每个 OSD 1GB，防止内存溢出
+      CEPH_DASHBOARD_USER: panyu
+      CEPH_DASHBOARD_PASSWORD: panyu 
+      CEPH_DEMO_UID: panyu
+      CEPH_DEMO_ACCESS_KEY: panyu
+      CEPH_DEMO_SECRET_KEY: panyu
+      TZ: Asia/Shanghai
+    volumes:
+      - ceph-etc:/etc/ceph
+      - ceph-lib:/var/lib/ceph
+    mem_limit: 8g
+    healthcheck:
+      test: ["CMD-SHELL", "ceph -s | grep -qE 'HEALTH_(OK|WARN)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 300s
+    networks:
+      - ceph-net
+
+

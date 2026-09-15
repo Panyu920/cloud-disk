@@ -2,4 +2,5 @@ include:
   - compose/public.yml
   - compose/redis.yml
   - compose/mysql.yml
+  - compose/ceph_aio.yml
 

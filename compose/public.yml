@@ -2,7 +2,11 @@ volumes:
   mysql-master-data:
   mysql-slave-data:
   redis-data-volume:
+  ceph-etc:
+  ceph-lib:
 
 networks:
   mysql-network:
+    driver: bridge
+  ceph-net:
     driver: bridge
