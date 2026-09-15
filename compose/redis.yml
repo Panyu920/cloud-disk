@@ -1,0 +1,11 @@
+services:
+  redis-data:
+    image: redis:8.10.1-alpine
+    container_name: redis-data
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data-volume:/data
+      - ./cache/user.acl:/usr/local/etc/redis/user.acl:ro
+    command: redis-server --aclfile /usr/local/etc/redis/user.acl --appendonly yes

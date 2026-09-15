@@ -1,0 +1,8 @@
+volumes:
+  mysql-master-data:
+  mysql-slave-data:
+  redis-data-volume:
+
+networks:
+  mysql-network:
+    driver: bridge
