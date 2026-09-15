@@ -7,5 +7,5 @@ services:
       - "6379:6379"
     volumes:
       - redis-data-volume:/data
-      - ./cache/user.acl:/usr/local/etc/redis/user.acl:ro
+      - ../cache/user.acl:/usr/local/etc/redis/user.acl:ro
     command: redis-server --aclfile /usr/local/etc/redis/user.acl --appendonly yes

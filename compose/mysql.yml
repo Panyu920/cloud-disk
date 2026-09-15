@@ -11,7 +11,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql-master-data:/var/lib/mysql
-      - ./config/mysql/master/conf.d/:/etc/mysql/conf.d
+      - ../config/mysql/master/conf.d/:/etc/mysql/conf.d
     networks:
       - mysql-network
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql-slave-data:/var/lib/mysql
-      - ./config/mysql/slave/conf.d/:/etc/mysql/conf.d
+      - ../config/mysql/slave/conf.d/:/etc/mysql/conf.d
     networks:
       - mysql-network   
     restart: unless-stopped
